@@ -1,0 +1,11 @@
+.Spreadsheet td {
+  text-align: left;
+}
+
+.Spreadsheet label {
+  padding-right: 8px;
+}
+
+.Spreadsheet .formula {
+  text-align: left;
+}
