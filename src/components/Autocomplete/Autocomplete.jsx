@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { blogData } from "./data/blogPostData";
 import './Autocomplete.css';
 
@@ -15,22 +15,30 @@ const Autocomplete = () => {
   // Array of items matching the input requirements.
   const [results, setResults] = useState([]);
 
-  // This is hacky due to time constraints. It prevents the results from clearing
-  // when the input loses focus. This happens when a result tile is mouse clicked,
-  // causing the results to be cleared before the click is registered. The correct 
-  // way to do this is to track component off-clicks & tab presses to hide the results, 
-  // rather than when the input is blurred.
-  
-  let showResultsTimeout = undefined;
+  const autocompleteRef = useRef(null);
 
-  const handleBlur = () => {
-    clearTimeout(showResultsTimeout);
-    setIsFocused(false)
-    showResultsTimeout = setTimeout(() => setIsShowingResults(false), 300);
-  }
+  useEffect(() => {
+    const handleOffClick = (event) => {
+      if (
+        autocompleteRef.current &&
+        isShowingResults &&
+        !autocompleteRef.current.contains(event.target)
+      ) {
+        setActiveResult(-1);
+        setIsShowingResults(false);
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOffClick);
+    document.addEventListener('mousedown', handleOffClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOffClick);
+    }
+  }, [isShowingResults]);
 
   const handleFocus = () => {
-    clearTimeout(showResultsTimeout);
     setActiveResult(-1);
     setIsFocused(true);
     setIsShowingResults(true);
@@ -45,23 +53,33 @@ const Autocomplete = () => {
         if (hasResults && isShowingResults && activeResult > -1) {
           event.preventDefault();
           handleResultClick(activeResult)();
+        } else if (hasResults) {
+          setIsShowingResults(true)
         }
         break;
       case 'ArrowDown': {
+        event.preventDefault();
         if (hasResults && isShowingResults && activeResult < results.length -1) {
-          event.preventDefault();
           setActiveResult(activeResult + 1);
+        } else if (hasResults) {
+          setIsShowingResults(true)
         }
         break;
       }
       case 'ArrowUp': {
-        if (hasResults && isShowingResults && activeResult > 0) {
-          event.preventDefault();
+        event.preventDefault();
+        if (hasResults && isShowingResults && activeResult > -1) {
           setActiveResult(activeResult - 1);
         }
         break;
       }
+      case 'Escape':
+      case 'Tab': {
+        setIsShowingResults(false);
+        break;
+      }
       default:
+        setActiveResult(-1);
     }
   }
  
@@ -122,14 +140,14 @@ const Autocomplete = () => {
   const classNames = classList.join(' ');
 
   return (
-    <div className={classNames}>
+    <div className={classNames} ref={autocompleteRef}>
       <div className="input-container">
         <label htmlFor="autocomplete">
           Blog Posts
         </label>
         <input
           id="autocomplete"
-          onBlur={handleBlur}
+          // onBlur={handleBlur}
           onFocus={handleFocus}
           onInput={handleUserInput}
           onKeyDown={handleKeyDown}
