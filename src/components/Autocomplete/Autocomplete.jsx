@@ -75,6 +75,7 @@ const Autocomplete = () => {
       case 'Escape':
       case 'Tab': {
         setIsShowingResults(false);
+        setActiveResult(-1);
         break;
       }
       default:
