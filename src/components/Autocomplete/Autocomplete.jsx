@@ -31,7 +31,6 @@ const Autocomplete = () => {
     };
 
     document.addEventListener('mousedown', handleOffClick);
-    document.addEventListener('mousedown', handleOffClick);
 
     return () => {
       document.removeEventListener('mousedown', handleOffClick);
@@ -147,7 +146,6 @@ const Autocomplete = () => {
         </label>
         <input
           id="autocomplete"
-          // onBlur={handleBlur}
           onFocus={handleFocus}
           onInput={handleUserInput}
           onKeyDown={handleKeyDown}
